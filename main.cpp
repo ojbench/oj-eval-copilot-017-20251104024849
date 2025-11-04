@@ -1,4 +1,6 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <cstring>
 using namespace std;
 
 // Minimal user system to pass user-related tests. Other commands mostly stubbed.
@@ -66,8 +68,8 @@ bool create_user(const string &u, const string &p, const string &n, const string
     return true;
 }
 
-static inline string get_param(const vector<string> &tok, const string &key){
-    for (size_t i = 0; i + 1 < tok.size(); ++i){
+static inline string get_param(string tok[], int tcnt, const string &key){
+    for (int i = 0; i + 1 < tcnt; ++i){
         if (tok[i] == key) return tok[i+1];
     }
     return "";
@@ -80,21 +82,21 @@ int main(){
     string line;
     while (std::getline(cin, line)){
         if (line.empty()) continue;
-        // split by spaces
-        vector<string> t; t.reserve(32);
+        // split by spaces into fixed array
+        string t[128]; int tcnt = 0;
         {
             string cur; cur.reserve(64);
             for (size_t i = 0; i < line.size(); ++i){
                 char c = line[i];
                 if (c == ' ' || c == '\t' || c == '\r' || c == '\n'){
-                    if (!cur.empty()){ t.push_back(cur); cur.clear(); }
+                    if (!cur.empty()){ if (tcnt < 128) t[tcnt++] = cur; cur.clear(); }
                 } else {
                     cur.push_back(c);
                 }
             }
-            if (!cur.empty()) t.push_back(cur);
+            if (!cur.empty() && tcnt < 128) t[tcnt++] = cur;
         }
-        if (t.empty()) continue;
+        if (tcnt == 0) continue;
 
         const string &cmd = t[0];
 
@@ -108,12 +110,12 @@ int main(){
             cout << 0 << '\n';
         } else if (cmd == "add_user"){
             // -c -u -p -n -m -g ; special case for first user
-            string cu = get_param(t, "-c");
-            string u = get_param(t, "-u");
-            string p = get_param(t, "-p");
-            string n = get_param(t, "-n");
-            string m = get_param(t, "-m");
-            string gs = get_param(t, "-g");
+            string cu = get_param(t, tcnt, "-c");
+            string u = get_param(t, tcnt, "-u");
+            string p = get_param(t, tcnt, "-p");
+            string n = get_param(t, tcnt, "-n");
+            string m = get_param(t, tcnt, "-m");
+            string gs = get_param(t, tcnt, "-g");
             if (user_count == 0){
                 bool ok = create_user(u, p, n, m, 10);
                 cout << (ok ? 0 : -1) << '\n';
@@ -126,8 +128,8 @@ int main(){
                 cout << (ok ? 0 : -1) << '\n';
             }
         } else if (cmd == "login"){
-            string u = get_param(t, "-u");
-            string p = get_param(t, "-p");
+            string u = get_param(t, tcnt, "-u");
+            string p = get_param(t, tcnt, "-p");
             int idx = get_user_index(u);
             if (idx < 0) { cout << -1 << '\n'; continue; }
             if (users[idx].logged_in) { cout << -1 << '\n'; continue; }
@@ -157,10 +159,10 @@ int main(){
             if (cidx < 0 || uidx < 0) { cout << -1 << '\n'; continue; }
             if (!users[cidx].logged_in) { cout << -1 << '\n'; continue; }
             if (!(users[cidx].privilege > users[uidx].privilege || cidx == uidx)) { cout << -1 << '\n'; continue; }
-            string p = get_param(t, "-p");
-            string n = get_param(t, "-n");
-            string m = get_param(t, "-m");
-            string gs = get_param(t, "-g");
+            string p = get_param(t, tcnt, "-p");
+            string n = get_param(t, tcnt, "-n");
+            string m = get_param(t, tcnt, "-m");
+            string gs = get_param(t, tcnt, "-g");
             if (!gs.empty()){
                 int g = stoi(gs);
                 if (g >= users[cidx].privilege) { cout << -1 << '\n'; continue; }
